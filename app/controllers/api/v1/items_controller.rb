@@ -1,4 +1,4 @@
-class Api::V1::itemsController < ApplicationController
+class Api::V1::ItemsController < ApplicationController
   def index
     render json: Item.all
   end
