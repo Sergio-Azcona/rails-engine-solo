@@ -1,10 +1,10 @@
 class Api::V1::ItemsController < ApplicationController
   def index
-    render json: Item.all
+    render json: ItemSerializer.index_serialize(Item.all)
   end
 
   def show
-    render json: Item.find(params[:id]) 
+    render json: ItemSerializer.show_serialize(Item.find(params[:id])) 
   end
 
   def create 
