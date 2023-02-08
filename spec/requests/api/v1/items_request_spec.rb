@@ -27,5 +27,22 @@ describe "Items API" do
     end
   end
 
+  it 'can get a single/show merchant' do
+    item = create_list(:item,1).first
+    
+    get "/api/v1/merchant/#{item.id}"
+    expect(response).to be_successful
+
+    item = JSON.parse(response.body, symbolize_names: true)
+
+    require 'pry';binding.pry if item[:id] == false
+    expect(item[:data]).to have_key(:id)
+    expect(item[:data][:id]).to be_an(Integer)
+    
+    expect(item[:data][:attributes]).to have_key(:name)
+    expect(item[:data][:attributes][:name]).to be_a(String)
+  end
+
+
 
 end

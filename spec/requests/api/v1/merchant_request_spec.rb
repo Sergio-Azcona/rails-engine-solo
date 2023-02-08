@@ -24,18 +24,18 @@ describe "Merchants API" do
 
   it 'can get a single/show merchant' do
     merchant = create_list(:merchant,1).first
-    
+
     get "/api/v1/merchant/#{merchant.id}"
     expect(response).to be_successful
 
     merchant = JSON.parse(response.body, symbolize_names: true)
       # require 'pry';binding.pry
-      require 'pry';binding.pry if merchant[:id] == false
-      expect(merchant[:data]).to have_key(:id)
-      expect(merchant[:data][:id]).to be_an(Integer)
-      
-      expect(merchant[:data][:attributes]).to have_key(:name)
-      expect(merchant[:data][:attributes][:name]).to be_a(String)
+    require 'pry';binding.pry if merchant[:id] == false
+    expect(merchant[:data]).to have_key(:id)
+    expect(merchant[:data][:id]).to be_an(Integer)
+    
+    expect(merchant[:data][:attributes]).to have_key(:name)
+    expect(merchant[:data][:attributes][:name]).to be_a(String)
   end
 
 end
