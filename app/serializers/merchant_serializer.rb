@@ -4,7 +4,7 @@ class MerchantSerializer
     "data": merchants.map do |merchant|
       {
         "type": merchant.class.to_s.downcase, 
-        "id": merchant.id,
+        "id": merchant.id.to_s,
         "attributes": 
           {
             "name": merchant.name,
@@ -19,7 +19,7 @@ class MerchantSerializer
     "data":
       {
         "type": merchant.class.to_s.downcase, 
-        "id": merchant.id,
+        "id": merchant.id.to_s,
         "attributes": 
           {
             "name": merchant.name,

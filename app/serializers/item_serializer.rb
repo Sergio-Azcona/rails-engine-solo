@@ -3,14 +3,17 @@ class ItemSerializer
     {
       "data": items.map do |item|
             {
-              "id": item.id,
+              "id": item.id.to_s,
               "type": item.class.to_s.downcase,
-              "attributes": 
-                          {
+              "attributes": {
                             "name": item.name,
                             "description": item.description,
                             "unit_price": item.unit_price,
-                          }
+              # },
+              # "relationships": {
+              #               "type": item.merchant.class.to_s.downcase,
+                            "merchant_id": item.merchant_id
+              }
             }
         end
     }
@@ -20,14 +23,17 @@ class ItemSerializer
     {
       "data": 
             {
-              "id": item.id,
+              "id": item.id.to_s,
               "type": item.class.to_s.downcase,
-              "attributes": 
-                          {
+              "attributes": {
                             "name": item.name,
                             "description": item.description,
                             "unit_price": item.unit_price,
-                          }
+                # },
+              # "relationships": {
+              #               "type": item.merchant.class.to_s.downcase,
+              "merchant_id": item.merchant_id
+              }
             }
     }
   end
