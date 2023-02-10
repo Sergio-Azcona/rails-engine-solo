@@ -8,9 +8,14 @@ class ApplicationController < ActionController::API
   
   # rescue_from ActiveRecord::InvalidURIError, with: :invalid_url_response
   # rescue_from error, with: :standard_error_response
+  # 
   # def standard_error_response(error)
   #   render json: ErrorSerializer.serialized_response(error, 400), status: 400    
   # end
+
+  def route_not_found
+    render json: { error: "route not found"}, status: 400    
+  end
 
 
   # rescue DataTypeError => error
