@@ -4,26 +4,33 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def show
-    render json: ItemSerializer.show_serialize(Item.find(params[:id])) 
+    item = Item.find(params[:id])
+    render json: ItemSerializer.show_serialize(item) 
   end
 
   def create 
     new_item = Item.new(item_params)
-    # require 'pry';binding.pry
     if new_item.save
-      render json: ItemSerializer.show_serialize(new_item), status: 201
-      # render BookSerializer.one_book(new_item)
+      render json: ItemSerializer.show_serialize(new_item), status: 201 
     else
+    # render json: ErrorSerializer.serialized_response(new_item.errors.full_messages.first, 422), status: 422
       render json: new_item.errors.full_messages, status: 422
+    # require 'pry';binding.pry
     end
   end
 
   def update
-    Item.find(params[:id]) 
+    updating_item =  Item.find(params[:id]) 
+    if updating_item.update(item_params)
+      render json: ItemSerializer.show_serialize(updating_item), status: 201 
+    else
+      render json: updating_item.errors.full_messages, status: 422
+    end
   end
 
   def destroy
     item = Item.find(params[:id]) 
+    
   end
 
   private 

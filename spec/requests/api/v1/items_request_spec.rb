@@ -67,8 +67,8 @@ describe "Items API" do
 
   describe '#show functionality' do
     it 'render a JSON representation of the corresponding record, if found' do
-      item = create_list(:item,1).first
-      
+      item = create(:item)
+      # require 'pry';binding.pry
       get "/api/v1/items/#{item.id}"
       expect(response).to be_successful
       expect(response.status).to eq(200)
@@ -89,12 +89,14 @@ describe "Items API" do
 
   describe '#create functionality' do
     it 'create a record and render a JSON representation of the new Item record' do
-      merchant = create(:merchant).id
+      merchant = create(:merchant)
+      # item = create(:item, merchant_id: merchant.id)
+
       item_params = ({
                     "name": "value1",
                     "description": "value2",
                     "unit_price": 100.99,
-                    "merchant_id": merchant
+                    "merchant_id": merchant.id
                   })
       headers = {"CONTENT_TYPE" => "application/json"}
 
@@ -118,22 +120,45 @@ describe "Items API" do
         merchant = create(:merchant).id
         incorrect_item_params = ({
                       "name": "value1",
-                      "description": 100.99,
-                      "unit_price": "100.99",
+                      "description": "blue",
+                      "unit_price": "",
                       "merchant_id": merchant
                     })
         headers = {"CONTENT_TYPE" => "application/json"}
 
-        post "/api/v1/items", headers: headers,  params: JSON.generate(item: incorrect_item_params)
+        post "/api/v1/items", headers: headers, params: JSON.generate(item: incorrect_item_params)
         # require 'pry';binding.pry
-        expect(response).to be_successful
-        # expect(response.status).to eq(422)
+        expect(response).to_not be_successful
+        expect(response.status).to eq(422)
 
         expect(Item.last).to_not eq(incorrect_item_params)
       end
+    end
 
-      it 'ignores any attributes sent by the user which are not allowed' do
+    describe '#update functionality' do
+      it 'update the corresponding Item (if found) with whichever details are provided by the user' do
+        merchant = create(:merchant)
+        item = create(:item, unit_price: 49.01, merchant_id: merchant.id)
+        
+        item_params = ({
+                      "name": "value1",
+                      "description": "value2",
+                      "unit_price": 100.99,
+                      "merchant_id": merchant.id
+      
+                    })
+        headers = {"CONTENT_TYPE" => "application/json"}
+        patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: item_params, symbolize_names: true)
+        
+        updated_item = Item.find_by(id: item.id)
+
+        expect(response).to be_successful
+        expect(response.status).to eq(201)
+
+        expect(item.unit_price).to_not eq(updated_item.unit_price)
+        expect(updated_item.unit_price).to eq(100.99)
       end
+
     end
 
   end
