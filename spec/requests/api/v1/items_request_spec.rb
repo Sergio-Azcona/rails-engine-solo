@@ -212,17 +212,19 @@ describe "Items API" do
   describe '#destroy functionality' do
     it 'destroy the corresponding record (if found) and any associated data' do
       item = create(:item)
-      destroy "/api/v1/items/#{item.id}"
-      require 'pry';binding.pry
+      expect(item).to be_a(Item)
 
+      delete "/api/v1/items/#{item.id}"
+      # require 'pry';binding.pry
       expect(response).to be_successful
       expect(response.status).to eq(204)
+      expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
     end
+    
+    # it 'destroy any invoice if this was the only item on an invoice' do
 
-  
-    end
 
-
+    # end
   end
 
 end
