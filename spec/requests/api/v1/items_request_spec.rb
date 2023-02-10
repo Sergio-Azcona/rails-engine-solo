@@ -89,77 +89,139 @@ describe "Items API" do
 
   describe '#create functionality' do
     it 'create a record and render a JSON representation of the new Item record' do
-      merchant = create(:merchant)
-      # item = create(:item, merchant_id: merchant.id)
+    merchant = create(:merchant)
+    # item = create(:item, merchant_id: merchant.id)
 
+    item_params = ({
+                  "name": "value1",
+                  "description": "value2",
+                  "unit_price": 100.99,
+                  "merchant_id": merchant.id
+                })
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    post "/api/v1/items", headers: headers,  params: JSON.generate(item: item_params)
+    created_item = Item.last
+    # require 'pry';binding.pry
+    expect(response).to be_successful
+    expect(response.status).to eq(201)
+
+    expect(created_item.name).to eq(item_params[:name])
+    expect(created_item.description).to eq(item_params[:description])
+    expect(created_item.unit_price).to eq(item_params[:unit_price])
+    expect(created_item.merchant_id).to eq(item_params[:merchant_id])
+  
+    expect(created_item.unit_price).to be_a(Float)
+    expect(created_item.merchant_id).to be_a(Integer)
+    end
+  end
+
+  describe 'sad path' do
+    it 'return an error if any attribute is missing' do
+      merchant = create(:merchant).id
+      incorrect_item_params = ({
+                    "name": "value1",
+                    "description": "blue",
+                    "unit_price": "",
+                    "merchant_id": merchant
+                  })
+      headers = {"CONTENT_TYPE" => "application/json"}
+
+      post "/api/v1/items", headers: headers, params: JSON.generate(item: incorrect_item_params)
+      # require 'pry';binding.pry
+      expect(response).to_not be_successful
+      expect(response.status).to eq(422)
+
+      expect(Item.last).to_not eq(incorrect_item_params)
+    end
+  end
+
+  describe '#update functionality' do
+    it 'update the corresponding Item (if found) with whichever details are provided by the user' do
+      merchant = create(:merchant)
+      item = create(:item, unit_price: 49.01, merchant_id: merchant.id)
+      
       item_params = ({
                     "name": "value1",
                     "description": "value2",
                     "unit_price": 100.99,
                     "merchant_id": merchant.id
+    
                   })
       headers = {"CONTENT_TYPE" => "application/json"}
+      patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: item_params, symbolize_names: true)
+      
+      updated_item = Item.find_by(id: item.id)
 
-      post "/api/v1/items", headers: headers,  params: JSON.generate(item: item_params)
-      created_item = Item.last
-      # require 'pry';binding.pry
       expect(response).to be_successful
       expect(response.status).to eq(201)
 
-      expect(created_item.name).to eq(item_params[:name])
-      expect(created_item.description).to eq(item_params[:description])
-      expect(created_item.unit_price).to eq(item_params[:unit_price])
-      expect(created_item.merchant_id).to eq(item_params[:merchant_id])
-    
-      expect(created_item.unit_price).to be_a(Float)
-      expect(created_item.merchant_id).to be_a(Integer)
+      expect(item.unit_price).to_not eq(updated_item.unit_price)
+      expect(updated_item.unit_price).to eq(100.99)
     end
 
-    describe 'sad path' do
-      it 'return an error if any attribute is missing' do
-        merchant = create(:merchant).id
-        incorrect_item_params = ({
-                      "name": "value1",
-                      "description": "blue",
-                      "unit_price": "",
-                      "merchant_id": merchant
-                    })
-        headers = {"CONTENT_TYPE" => "application/json"}
-
-        post "/api/v1/items", headers: headers, params: JSON.generate(item: incorrect_item_params)
-        # require 'pry';binding.pry
-        expect(response).to_not be_successful
-        expect(response.status).to eq(422)
-
-        expect(Item.last).to_not eq(incorrect_item_params)
-      end
-    end
-
-    describe '#update functionality' do
-      it 'update the corresponding Item (if found) with whichever details are provided by the user' do
-        merchant = create(:merchant)
-        item = create(:item, unit_price: 49.01, merchant_id: merchant.id)
-        
-        item_params = ({
-                      "name": "value1",
-                      "description": "value2",
-                      "unit_price": 100.99,
-                      "merchant_id": merchant.id
+    it 'DOES NOT update Item if params has incorrect datatypes' do
+      merchant = create(:merchant)
+      item = create(:item, unit_price: 49.01, merchant_id: merchant.id)
       
-                    })
-        headers = {"CONTENT_TYPE" => "application/json"}
-        patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: item_params, symbolize_names: true)
-        
-        updated_item = Item.find_by(id: item.id)
+      bad_item_params = ({
+                    "id": item.id,
+                    "name": "value1",
+                    "description": 5849,
+                    "unit_price": 100.99,
+                    "merchant_id": "merchant.id"
+    
+                  })
+      headers = {"CONTENT_TYPE" => "application/json"}
+      patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: bad_item_params, symbolize_names: true)
+      
+      item_post_attempt = Item.find_by(id: item.id)
+      # require 'pry';binding.pry
+      expect(response).to_not be_successful
+      expect(response.status).to eq(404)
 
-        expect(response).to be_successful
-        expect(response.status).to eq(201)
-
-        expect(item.unit_price).to_not eq(updated_item.unit_price)
-        expect(updated_item.unit_price).to eq(100.99)
-      end
-
+      expect(item).to eq(item_post_attempt)
+      expect(item_post_attempt.description).to_not eq(bad_item_params[:description])
     end
+
+    it 'DOES NOT update Item if params has missing information' do
+      merchant = create(:merchant)
+      item = create(:item, unit_price: 49.01, merchant_id: merchant.id)
+      
+      bad_item_params = ({
+                    "id": item.id,
+                    "name": "value1",
+                    "description": "value2",
+                    "unit_price": "",
+                    "merchant_id": merchant.id
+    
+                  })
+      headers = {"CONTENT_TYPE" => "application/json"}
+      patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate(item: bad_item_params, symbolize_names: true)
+      
+      item_post_attempt = Item.find_by(id: item.id)
+      # require 'pry';binding.pry
+      expect(response).to_not be_successful
+      expect(response.status).to eq(404)
+
+      expect(item).to eq(item_post_attempt)
+      expect(item_post_attempt.unit_price).to_not eq(bad_item_params[:unit_price])
+    end
+  end
+
+  describe '#destroy functionality' do
+    it 'destroy the corresponding record (if found) and any associated data' do
+      item = create(:item)
+      destroy "/api/v1/items/#{item.id}"
+      require 'pry';binding.pry
+
+      expect(response).to be_successful
+      expect(response.status).to eq(204)
+    end
+
+  
+    end
+
 
   end
 

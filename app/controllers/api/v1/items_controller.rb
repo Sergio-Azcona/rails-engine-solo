@@ -24,13 +24,13 @@ class Api::V1::ItemsController < ApplicationController
     if updating_item.update(item_params)
       render json: ItemSerializer.show_serialize(updating_item), status: 201 
     else
-      render json: updating_item.errors.full_messages, status: 422
+      render json: updating_item.errors.full_messages, status: 404
     end
   end
 
   def destroy
     item = Item.find(params[:id]) 
-    
+    item.destroy    
   end
 
   private 
