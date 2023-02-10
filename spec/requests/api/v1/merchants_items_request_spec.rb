@@ -6,11 +6,11 @@ describe "MerchantItems API" do
     merchant_items = create_list(:item, 7, merchant: merchant)
     
     get("/api/v1/merchants/#{merchant.id}/items")
+    # require 'pry';binding.pry
     expect(response).to be_successful
     expect(response.status).to eq(200)
     
     items = JSON.parse(response.body, symbolize_names: true)
-    # require 'pry';binding.pry
     expect(items[:data]).to be_a(Array)
     expect(items[:data].count).to eq(7)
     expect(items[:data][0][:attributes][:merchant_id]).to eq(merchant_items.first.merchant_id)
@@ -21,12 +21,12 @@ describe "MerchantItems API" do
     items = create_list(:item, 7)
 
     get("/api/v1/merchants/#{invalid_merchant_id}/items")
+    # require 'pry';binding.pry
     error_response = JSON.parse(response.body, symbolize_names: true)
-    
     expect(response).to_not be_successful
     expect(response.status).to eq(404)
-    expect(error_response[:errors][:error_message]).to eq("No object found with id: #{invalid_merchant_id}")
-    expect(error_response[:errors][:status]).to eq("NOT FOUND")
-  end 
-
+    # require 'pry';binding.pry
+    expect(error_response[:errors][0][:error_message]).to eq("Couldn't find Merchant with 'id'=#{invalid_merchant_id}")
+    expect(error_response[:errors][0][:status]).to eq("404")
+  end  
 end
