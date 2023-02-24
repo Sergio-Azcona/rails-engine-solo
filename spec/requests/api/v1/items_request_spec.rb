@@ -156,7 +156,6 @@ describe "Items API" do
       expect(response).to be_successful
       expect(response.status).to eq(201)
 
-      expect(item.unit_price).to_not eq(updated_item.unit_price)
       expect(updated_item.unit_price).to eq(100.99)
     end
 

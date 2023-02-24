@@ -5,15 +5,13 @@ Rails.application.routes.draw do
       resources :items, only: [:index, :show, :create, :update, :destroy] do
         resources :merchant, only: :index, controller: :item_merchant
       end
-    end
-  end
 
-  namespace :api do
-    namespace :v1 do
       resources :merchants, only: [:index, :show] do  
         resources :items, only: :index, controller: :merchants_items
       end
     end
   end
 
+  match '*unmatched', to: 'application#route_not_found', via: :all 
+  #* = wildcard ->send to the controller#action
 end

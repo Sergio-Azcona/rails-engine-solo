@@ -1,4 +1,6 @@
 class Api::V1::ItemsController < ApplicationController
+
+  
   def index
     render json: ItemSerializer.index_serialize(Item.all)
   end
@@ -9,12 +11,21 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def create 
-    new_item = Item.new(item_params)
-    if new_item.save
+    # new_item = Item.new(item_params)
+    # if new_item.save
+    #   render json: ItemSerializer.show_serialize(new_item), status: 201 
+    # else
+    # # render json: ErrorSerializer.serialized_response(new_item.errors.full_messages.first, 422), status: 422
+    #   render json: new_item.errors.full_messages, status: 422
+    # # require 'pry';binding.pry
+    # end
+    begin
+      new_item = Item.create!(item_params)
+      # new_item.create
       render json: ItemSerializer.show_serialize(new_item), status: 201 
-    else
-    # render json: ErrorSerializer.serialized_response(new_item.errors.full_messages.first, 422), status: 422
-      render json: new_item.errors.full_messages, status: 422
+    rescue => error
+    render json: ErrorSerializer.serialized_response(error, 422), status: 422
+      # render json: new_item.errors.full_messages, status: 422
     # require 'pry';binding.pry
     end
   end
